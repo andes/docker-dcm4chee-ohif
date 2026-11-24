@@ -73,14 +73,15 @@ deploy_weasis:
 	docker cp conf/weasis-pacs-connector.properties arc:/tmp/weasis-pacs-connector.properties
 	docker cp conf/dicom-dcm4chee-arc.properties arc:/tmp/dicom-dcm4chee-arc.properties
 	echo "changing configuration in weasis pacs connector deployment"
+	docker exec arc jboss-cli.sh -Djavax.net.ssl.trustStore=/opt/wildfly/domain/configuration/https.store -c --controller=localhost:9990 --command="deployment-overlay remove --name=dcm4chee-arc" || true
 	docker exec arc jboss-cli.sh -Djavax.net.ssl.trustStore=/opt/wildfly/domain/configuration/https.store -c --controller=localhost:9990 --command="deployment-overlay add --name=dcm4chee-arc --deployments=weasis-pacs-connector.war --content=WEB-INF/classes/weasis-pacs-connector.properties=/tmp/weasis-pacs-connector.properties,WEB-INF/classes/dicom-dcm4chee-arc.properties=/tmp/dicom-dcm4chee-arc.properties --redeploy-affected"
 	echo "configuring permision for user to viewer.."
 	docker cp conf/weasis.ldif ldap:weasis.ldif
-	docker exec ldap ldapmodify -x -w "${LDAP_ROOTPASS}" -D "cn=admin,dc=dcm4che,dc=org" -H ldap://localhost:389 -f weasis.ldif
+	docker exec ldap ldapmodify -x -w "${LDAP_ROOTPASS}" -D "cn=admin,dc=dcm4che,dc=org" -H ldap://localhost:389 -f weasis.ldif || true
 
 configure_pacs:
 	docker cp conf/mwl.ldif ldap:mwl.ldif
-	docker exec ldap ldapmodify -x -w "${LDAP_ROOTPASS}" -D "cn=admin,dc=dcm4che,dc=org" -H ldap://localhost:389 -f mwl.ldif
+	docker exec ldap ldapmodify -x -w "${LDAP_ROOTPASS}" -D "cn=admin,dc=dcm4che,dc=org" -H ldap://localhost:389 -f mwl.ldif || true
 
 log: 
 	docker exec -it arc tail -f /opt/wildfly/standalone/log/server.log
