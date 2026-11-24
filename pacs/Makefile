@@ -49,7 +49,7 @@ add_clients:
 	docker cp conf/ui.json keycloak:ui.json;
 	echo "creating clients..."
 	docker exec keycloak bash -c  'kcadm.sh create clients -r dcm4che -f andes.json' || echo 'client exist';
-	docker exec keycloak kcadm.sh create clients -r dcm4che -f ohif.json;
+	docker exec keycloak bash -c 'kcadm.sh create clients -r dcm4che -f ohif.json' || echo 'client exist';
 	docker exec keycloak bash -c 'kcadm.sh create clients -r dcm4che -f ui.json' || echo 'client exist';
 	docker exec keycloak bash -c 'kcadm.sh create roles -r dcm4che -s name=user' || echo 'role exist'
 	docker exec keycloak bash -c 'kcadm.sh add-roles --uusername service-account-andes --rolename user -r dcm4che' || echo 'client role exists'
